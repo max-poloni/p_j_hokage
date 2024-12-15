@@ -27,28 +27,37 @@
 </head>
 <body>
     <script>
-        const healthCheckURL = 'https://j-hokage.onrender.com/health'; 
-
-        async function checkHealth() {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 4000); 
-
-            try {
-                const response = await fetch(healthCheckURL, { signal: controller.signal });
-                if (response.ok) {
-                    document.body.classList.remove('error');
-                } else {
-                    document.body.classList.add('error');
+            const healthCheckURL = 'https://j-hokage.onrender.com/health';
+            
+            async function checkHealth() {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 4000); 
+            
+                try {
+                    const response = await fetch(healthCheckURL, { signal: controller.signal });
+                    const text = await response.text(); 
+            
+                    console.log("Response status:", response.status); 
+                    console.log("Response text:", text.trim()); 
+            
+                    if (response.ok && text.trim() === "OK") {
+                        console.log("Server is healthy");
+                        document.body.classList.remove('error');
+                    } else {
+                        console.warn("Server returned an unexpected response");
+                        document.body.classList.add('error');
+                    }
+                } catch (error) {
+                    console.error("Health check failed:", error.message);
+                    document.body.classList.add('error'); 
+                } finally {
+                    clearTimeout(timeout);
                 }
-            } catch (error) {
-                document.body.classList.add('error'); 
-            } finally {
-                clearTimeout(timeout);
             }
-        }
+            
+            setInterval(checkHealth, 5000); 
+            checkHealth(); 
 
-        setInterval(checkHealth, 5000); 
-        checkHealth(); 
     </script>
 </body>
 </html>
